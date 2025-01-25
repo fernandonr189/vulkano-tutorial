@@ -1,12 +1,16 @@
 use std::sync::Arc;
 
 use vulkano::{
-    buffer::{Buffer, BufferCreateInfo, BufferUsage},
+    buffer::{Buffer, BufferContents, BufferCreateInfo, BufferUsage, Subbuffer},
+    descriptor_set::{
+        allocator::StandardDescriptorSetAllocator, PersistentDescriptorSet, WriteDescriptorSet,
+    },
     device::{Device, DeviceCreateInfo, Queue, QueueCreateInfo, QueueFlags},
     instance::{Instance, InstanceCreateFlags, InstanceCreateInfo},
     memory::allocator::{
         AllocationCreateInfo, FreeListAllocator, GenericMemoryAllocator, MemoryTypeFilter,
     },
+    pipeline::{ComputePipeline, Pipeline},
     VulkanLibrary,
 };
 
@@ -63,12 +67,17 @@ pub fn create_device() -> VkDevice<impl ExactSizeIterator<Item = Arc<Queue>>> {
     }
 }
 
-pub fn create_buffer(
-    source: Vec<i32>,
+pub fn create_buffer<T, I>(
+    source: I,
     allocator: &Arc<GenericMemoryAllocator<FreeListAllocator>>,
     usage: BufferUsage,
     type_filter: MemoryTypeFilter,
-) -> vulkano::buffer::Subbuffer<[i32]> {
+) -> Subbuffer<[T]>
+where
+    T: BufferContents,
+    I: IntoIterator<Item = T>,
+    I::IntoIter: ExactSizeIterator,
+{
     Buffer::from_iter(
         allocator.clone(),
         BufferCreateInfo {
@@ -82,4 +91,27 @@ pub fn create_buffer(
         source,
     )
     .expect("failed to create buffer")
+}
+
+pub fn create_descriptor_set<T>(
+    device: &Arc<Device>,
+    compute_pipeline: &ComputePipeline,
+    data_buffer: &Subbuffer<[T]>,
+) -> Arc<PersistentDescriptorSet> {
+    let descriptor_set_allocator =
+        StandardDescriptorSetAllocator::new(device.clone(), Default::default());
+    let pipeline_layout = compute_pipeline.layout();
+    let descriptor_set_layouts = pipeline_layout.set_layouts();
+
+    let descriptor_set_layout_index = 0;
+    let descriptor_set_layout = descriptor_set_layouts
+        .get(descriptor_set_layout_index)
+        .unwrap();
+    PersistentDescriptorSet::new(
+        &descriptor_set_allocator,
+        descriptor_set_layout.clone(),
+        [WriteDescriptorSet::buffer(0, data_buffer.clone())], // 0 is the binding
+        [],
+    )
+    .unwrap()
 }
