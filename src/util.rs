@@ -118,12 +118,10 @@ pub fn create_image(
 }
 
 pub fn create_descriptor_set<T>(
-    device: &Arc<Device>,
     compute_pipeline: &ComputePipeline,
     data_buffer: &Subbuffer<[T]>,
+    descriptor_set_allocator: &StandardDescriptorSetAllocator,
 ) -> Arc<PersistentDescriptorSet> {
-    let descriptor_set_allocator =
-        StandardDescriptorSetAllocator::new(device.clone(), Default::default());
     let pipeline_layout = compute_pipeline.layout();
     let descriptor_set_layouts = pipeline_layout.set_layouts();
 
@@ -132,7 +130,7 @@ pub fn create_descriptor_set<T>(
         .get(descriptor_set_layout_index)
         .unwrap();
     PersistentDescriptorSet::new(
-        &descriptor_set_allocator,
+        descriptor_set_allocator,
         descriptor_set_layout.clone(),
         [WriteDescriptorSet::buffer(0, data_buffer.clone())], // 0 is the binding
         [],

@@ -6,6 +6,7 @@ use vulkano::{
         allocator::{StandardCommandBufferAllocator, StandardCommandBufferAllocatorCreateInfo},
         AutoCommandBufferBuilder, CommandBufferUsage,
     },
+    descriptor_set::allocator::StandardDescriptorSetAllocator,
     memory::allocator::{MemoryTypeFilter, StandardMemoryAllocator},
     pipeline::{
         compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
@@ -68,8 +69,14 @@ pub fn compute_pipeline() {
     )
     .expect("failed to create compute pipeline");
 
-    let descriptor_set =
-        util::create_descriptor_set::<u32>(&device, &compute_pipeline, &data_buffer);
+    let descriptor_set_allocator =
+        StandardDescriptorSetAllocator::new(device.clone(), Default::default());
+
+    let descriptor_set = util::create_descriptor_set::<u32>(
+        &compute_pipeline,
+        &data_buffer,
+        &descriptor_set_allocator,
+    );
 
     let command_buffer_allocator = StandardCommandBufferAllocator::new(
         device.clone(),
