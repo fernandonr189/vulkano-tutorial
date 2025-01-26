@@ -80,5 +80,5 @@ pub fn using_images() {
 
     image.save("image.png").unwrap();
 
-    println!("Everything succeeded!");
+    println!("Clear image creation successful");
 }

@@ -65,5 +65,5 @@ pub fn buffer_creation() {
     let destination_content = destination_buffer.read().unwrap();
     assert_eq!(&*src_content, &*destination_content);
 
-    println!("Everything succeeded!");
+    println!("Buffer creation successful!");
 }

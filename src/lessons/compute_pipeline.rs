@@ -113,5 +113,5 @@ pub fn compute_pipeline() {
         assert_eq!(*val, n as u32 * 12);
     }
 
-    println!("Everything succeeded!");
+    println!("Simple compute pipeline successful!");
 }
