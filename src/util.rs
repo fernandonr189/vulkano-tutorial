@@ -12,7 +12,11 @@ use vulkano::{
     memory::allocator::{
         AllocationCreateInfo, FreeListAllocator, GenericMemoryAllocator, MemoryTypeFilter,
     },
-    pipeline::{ComputePipeline, Pipeline},
+    pipeline::{
+        compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
+        ComputePipeline, Pipeline, PipelineLayout, PipelineShaderStageCreateInfo,
+    },
+    shader::ShaderModule,
     VulkanLibrary,
 };
 
@@ -136,4 +140,27 @@ pub fn create_descriptor_set<T>(
         [],
     )
     .unwrap()
+}
+
+pub fn create_compute_pipeline(
+    device: Arc<Device>,
+    shader: Arc<ShaderModule>,
+) -> Arc<ComputePipeline> {
+    let cs = shader.entry_point("main").unwrap();
+    let stage = PipelineShaderStageCreateInfo::new(cs);
+    let layout = PipelineLayout::new(
+        device.clone(),
+        PipelineDescriptorSetLayoutCreateInfo::from_stages([&stage])
+            .into_pipeline_layout_create_info(device.clone())
+            .unwrap(),
+    )
+    .unwrap();
+
+    let compute_pipeline = ComputePipeline::new(
+        device.clone(),
+        None,
+        ComputePipelineCreateInfo::stage_layout(stage, layout),
+    )
+    .expect("failed to create compute pipeline");
+    compute_pipeline
 }

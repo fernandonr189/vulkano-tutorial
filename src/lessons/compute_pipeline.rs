@@ -8,11 +8,7 @@ use vulkano::{
     },
     descriptor_set::allocator::StandardDescriptorSetAllocator,
     memory::allocator::{MemoryTypeFilter, StandardMemoryAllocator},
-    pipeline::{
-        compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
-        ComputePipeline, Pipeline, PipelineBindPoint, PipelineLayout,
-        PipelineShaderStageCreateInfo,
-    },
+    pipeline::{Pipeline, PipelineBindPoint},
     sync::{self, GpuFuture},
 };
 
@@ -52,25 +48,10 @@ pub fn compute_pipeline() {
     );
     let shader = cs::load(device.clone()).expect("failed to create shader module");
 
-    let cs = shader.entry_point("main").unwrap();
-    let stage = PipelineShaderStageCreateInfo::new(cs);
-    let layout = PipelineLayout::new(
-        device.clone(),
-        PipelineDescriptorSetLayoutCreateInfo::from_stages([&stage])
-            .into_pipeline_layout_create_info(device.clone())
-            .unwrap(),
-    )
-    .unwrap();
-
-    let compute_pipeline = ComputePipeline::new(
-        device.clone(),
-        None,
-        ComputePipelineCreateInfo::stage_layout(stage, layout),
-    )
-    .expect("failed to create compute pipeline");
-
     let descriptor_set_allocator =
         StandardDescriptorSetAllocator::new(device.clone(), Default::default());
+
+    let compute_pipeline = util::create_compute_pipeline(device.clone(), shader);
 
     let descriptor_set = util::create_descriptor_set::<u32>(
         &compute_pipeline,

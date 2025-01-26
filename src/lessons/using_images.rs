@@ -13,11 +13,7 @@ use vulkano::{
     format::{ClearColorValue, Format},
     image::{view::ImageView, Image, ImageCreateInfo, ImageType, ImageUsage},
     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter, StandardMemoryAllocator},
-    pipeline::{
-        compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
-        ComputePipeline, Pipeline, PipelineBindPoint, PipelineLayout,
-        PipelineShaderStageCreateInfo,
-    },
+    pipeline::{Pipeline, PipelineBindPoint},
     sync::{self, GpuFuture},
 };
 
@@ -153,22 +149,7 @@ pub fn mandelbrot_set() {
 
     let shader = cs::load(device.clone()).expect("failed to create shader module");
 
-    let cs = shader.entry_point("main").unwrap();
-    let stage = PipelineShaderStageCreateInfo::new(cs);
-    let layout = PipelineLayout::new(
-        device.clone(),
-        PipelineDescriptorSetLayoutCreateInfo::from_stages([&stage])
-            .into_pipeline_layout_create_info(device.clone())
-            .unwrap(),
-    )
-    .unwrap();
-
-    let compute_pipeline = ComputePipeline::new(
-        device.clone(),
-        None,
-        ComputePipelineCreateInfo::stage_layout(stage, layout),
-    )
-    .expect("failed to create compute pipeline");
+    let compute_pipeline = util::create_compute_pipeline(device.clone(), shader);
 
     let buf = util::create_buffer(
         (0..1024 * 1024 * 4).map(|_| 0u8),
