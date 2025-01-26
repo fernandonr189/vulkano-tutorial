@@ -6,6 +6,8 @@ use vulkano::{
         allocator::StandardDescriptorSetAllocator, PersistentDescriptorSet, WriteDescriptorSet,
     },
     device::{Device, DeviceCreateInfo, Queue, QueueCreateInfo, QueueFlags},
+    format::Format,
+    image::{Image, ImageCreateInfo, ImageType, ImageUsage},
     instance::{Instance, InstanceCreateFlags, InstanceCreateInfo},
     memory::allocator::{
         AllocationCreateInfo, FreeListAllocator, GenericMemoryAllocator, MemoryTypeFilter,
@@ -91,6 +93,28 @@ where
         source,
     )
     .expect("failed to create buffer")
+}
+
+pub fn create_image(
+    allocator: &Arc<GenericMemoryAllocator<FreeListAllocator>>,
+    usage: ImageUsage,
+    type_filter: MemoryTypeFilter,
+) -> Arc<Image> {
+    Image::new(
+        allocator.clone(),
+        ImageCreateInfo {
+            image_type: ImageType::Dim2d,
+            format: Format::R8G8B8A8_UNORM,
+            extent: [1024, 1024, 1],
+            usage,
+            ..Default::default()
+        },
+        AllocationCreateInfo {
+            memory_type_filter: type_filter,
+            ..Default::default()
+        },
+    )
+    .unwrap()
 }
 
 pub fn create_descriptor_set<T>(
