@@ -48,10 +48,10 @@ pub fn compute_pipeline() {
     );
     let shader = cs::load(device.clone()).expect("failed to create shader module");
 
+    let compute_pipeline = util::create_compute_pipeline(device.clone(), shader);
+
     let descriptor_set_allocator =
         StandardDescriptorSetAllocator::new(device.clone(), Default::default());
-
-    let compute_pipeline = util::create_compute_pipeline(device.clone(), shader);
 
     let descriptor_set = util::create_descriptor_set::<u32>(
         &compute_pipeline,
