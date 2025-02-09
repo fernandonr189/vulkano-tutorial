@@ -212,5 +212,5 @@ pub fn mandelbrot_set() {
     let image = ImageBuffer::<Rgba<u8>, _>::from_raw(1024, 1024, &buffer_content[..]).unwrap();
     image.save("mandelbrot.png").unwrap();
 
-    println!("Everything succeeded!");
+    println!("Mandelbrot set creatio successful!");
 }
